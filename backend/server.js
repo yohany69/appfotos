@@ -211,7 +211,19 @@ const PORT = process.env.PORT || 3001;
 
 
 
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://appfotos-8qot-oyxgtv3ad-julianiglesias24-9607s-projects.vercel.app",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+app.options("*", cors());
+
 app.use(express.json());
 
 const upload = multer({
