@@ -3,6 +3,10 @@ import { MapContainer, TileLayer, Marker, Popup, CircleMarker, useMapEvents } fr
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
+
 import { getHealth, getIncidents, createIncident } from "./services/api";
 
 const initialIncidents = [
@@ -186,12 +190,28 @@ function MapClickHandler({ onPickLocation }) {
   return null;
 }
 
+// iconos en produccion leaflet *-
+delete L.Icon.Default.prototype._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
+//   -*
+
+
 function App() {
   useEffect(() => {
   async function loadIncidents() {
     try {
       const data = await getIncidents();
-      console.log("Incidentes cargados:", data);
+    //  console.log("Incidentes cargados:", data);
+    const isDev = import.meta.env.DEV;
+
+if (isDev) {
+  console.log("Incidentes cargados:", data);
+}
       setIncidents(data);
     } catch (error) {
       console.error("Error cargando incidentes:", error);
@@ -223,15 +243,27 @@ function App() {
   }
 };
 
+const [loading, setLoading] = useState(false);
+const [error, setError] = useState(null);
+const [success, setSuccess] = useState(null);
+
   const [isDarkMode, setIsDarkMode] = useState(
   window.matchMedia("(prefers-color-scheme: dark)").matches
 );
 
   useEffect(() => {
-  fetch("http://localhost:3001/api/incidents")
+  fetch("https://infracali-backend.onrender.com")
     .then((res) => res.json())
     .then((data) => {
-      console.log("Incidentes cargados:", data);
+     
+      // console.log("Incidentes cargados:", data);
+     const isDev = import.meta.env.DEV;
+
+if (isDev) {
+  console.log("Incidentes cargados:", data);
+}
+
+
       setIncidents(data);
     })
     .catch((err) => console.error("Error cargando incidentes:", err));
@@ -261,10 +293,22 @@ function App() {
 
     // console.log("Antes del fetch");
    const analyzeImageWithAI = async () => {
+  //console.log("Se ejecutó analyzeImageWithAI");
+    const isDev = import.meta.env.DEV;
+
+if (isDev) {
   console.log("Se ejecutó analyzeImageWithAI");
+}
+
 
   if (!imageFile) {
-    console.log("No hay imagen");
+    //console.log("No hay imagen");
+    const isDev = import.meta.env.DEV;
+
+    if (isDev) {
+      console.log("No hay imagen");
+    }
+
     return;
   }
 
@@ -278,7 +322,12 @@ function App() {
     formData.append("description", description || "");
     formData.append("place", place || "");
 
-    console.log("Enviando imagen al backend...");
+    //console.log("Enviando imagen al backend...");
+    const isDev = import.meta.env.DEV;
+
+if (isDev) {
+  console.log("Enviando imagen al backend...");
+}
 
     const response = await fetch(
       `${import.meta.env.VITE_API_URL}/api/analyze-image`,
@@ -290,10 +339,15 @@ function App() {
 
     const data = await response.json();
 
-    console.log("Respuesta del backend:", data);
+    //console.log("Respuesta del backend:", data);
+    const isDev = import.meta.env.DEV;
+
+if (isDev) {
+  console.log("Respuesta del backend:", data);
+}
 
     if (!response.ok) {
-      throw new Error(data.error || "Error al analizar la imagen");
+      throw new Error(data.error || "No se pudo analizar la imagen. Intenta nuevamente.");
     }
 
     // SOLO PARA PRUEBA (luego lo mejoramos)
@@ -532,6 +586,44 @@ const submitReport = async () => {
     >
       Reportar ahora
     </button>
+    {loading && (
+  <div style={{
+    marginTop: "10px",
+    padding: "10px",
+    borderRadius: "10px",
+    background: "#eef2ff",
+    color: "#3730a3",
+    fontSize: "14px"
+  }}>
+    Analizando imagen...
+  </div>
+)}
+
+{error && (
+  <div style={{
+    marginTop: "10px",
+    padding: "10px",
+    borderRadius: "10px",
+    background: "#fee2e2",
+    color: "#991b1b",
+    fontSize: "14px"
+  }}>
+    {error}
+  </div>
+)}
+
+{success && (
+  <div style={{
+    marginTop: "10px",
+    padding: "10px",
+    borderRadius: "10px",
+    background: "#dcfce7",
+    color: "#166534",
+    fontSize: "14px"
+  }}>
+    {success}
+  </div>
+)}
   </div>
 </div>
 
