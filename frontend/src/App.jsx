@@ -1,11 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, CircleMarker, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import L from "leaflet";
-
-import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
-import markerIcon from "leaflet/dist/images/marker-icon.png";
-import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
 import { getHealth, getIncidents, createIncident } from "./services/api";
 
@@ -274,7 +269,7 @@ const [success, setSuccess] = useState(null);
     .then((data) => {
      
       // console.log("Incidentes cargados:", data);
-     const isDev = import.meta.env.DEV;
+    //onst isDev = import.meta.env.DEV;      
 
 if (isDev) {
   console.log("Incidentes cargados:", data);
@@ -309,23 +304,22 @@ if (isDev) {
   }, [incidents, filterType, searchText]);
 
     // console.log("Antes del fetch");
-   const analyzeImageWithAI = async () => {
-  //console.log("Se ejecutó analyzeImageWithAI");
-    const isDev = import.meta.env.DEV;
+  const analyzeImageWithAI = async () => {
+  const isDev = import.meta.env.DEV;
 
-if (isDev) {
-  console.log("Se ejecutó analyzeImageWithAI");
-}
-
+  if (isDev) {
+    console.log("Se ejecutó analyzeImageWithAI");
+    console.log("reportTitle:", reportTitle);
+    console.log("description:", description);
+    console.log("place:", place);
+    console.log("imageFile:", imageFile);
+  }
 
   if (!imageFile) {
-    //console.log("No hay imagen");
-    const isDev = import.meta.env.DEV;
-
     if (isDev) {
       console.log("No hay imagen");
     }
-
+    setImageAiError("Primero selecciona una imagen.");
     return;
   }
 
@@ -339,12 +333,9 @@ if (isDev) {
     formData.append("description", description || "");
     formData.append("place", place || "");
 
-    //console.log("Enviando imagen al backend...");
-    const isDev = import.meta.env.DEV;
-
-if (isDev) {
-  console.log("Enviando imagen al backend...");
-}
+    if (isDev) {
+      console.log("Enviando imagen al backend...");
+    }
 
     const response = await fetch(
       `${import.meta.env.VITE_API_URL}/api/analyze-image`,
@@ -356,18 +347,14 @@ if (isDev) {
 
     const data = await response.json();
 
-    //console.log("Respuesta del backend:", data);
-    const isDev = import.meta.env.DEV;
-
-if (isDev) {
-  console.log("Respuesta del backend:", data);
-}
+    if (isDev) {
+      console.log("Respuesta del backend:", data);
+    }
 
     if (!response.ok) {
       throw new Error(data.error || "No se pudo analizar la imagen. Intenta nuevamente.");
     }
 
-    // SOLO PARA PRUEBA (luego lo mejoramos)
     setImageAiResult({
       title: data.title || "Incidente detectado",
       emoji: data.emoji || "📍",
@@ -376,10 +363,9 @@ if (isDev) {
       agencyKey: data.agencyKey || "INFRA",
       recommendation: data.recommendation || "Revisión manual recomendada",
     });
-
   } catch (error) {
     console.error("Error IA:", error);
-    setImageAiError(error.message);
+    setImageAiError(error.message || "Error al analizar la imagen.");
   } finally {
     setImageAiLoading(false);
   }
